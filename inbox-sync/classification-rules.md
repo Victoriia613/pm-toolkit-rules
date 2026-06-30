@@ -55,6 +55,50 @@ Generic positive language ("sounds good", "great") without one of the above is *
 
 ---
 
+---
+
+## PM To-Do's page management
+
+These rules apply every time the sync reads or writes the PM To-Do's page, whether adding new items or cleaning up completed ones.
+
+### Priority ordering
+
+Always maintain PM To-Do items in priority order — highest priority at the top, lowest at the bottom:
+
+1. ⚠️ HIGH
+2. Medium (no emoji)
+3. Low (no emoji)
+4. Unspecified priority — append at the bottom
+
+When adding a new item, insert it at the correct position within its priority band, not simply at the end of the list. After adding, re-check the full list order and reorder if needed.
+
+Indicate priority inline in the checklist text using `⚠️ HIGH`, `Medium`, or `Low` suffix — e.g.:
+`- [ ] [SGD B2B] Confirm delivery date (re: "Q3 shipment follow-up") ⚠️ HIGH`
+
+Derive priority from the email: explicit urgency language ("urgent", "ASAP", "blocking", "critical", deadline today/tomorrow) → HIGH; general requests with a stated deadline → Medium; FYI-style obligations with no urgency → Low. When unclear, default to Medium.
+
+### Grouping by project (shared PM To-Do's page)
+
+If two or more active registry rows point to the **same PM To-Do's page URL**, group all items under a heading per project. Use H2 (`##`) headings matching the project display name (e.g. `## SGD B2B`, `## Gemoss`). Within each group, maintain priority order as above.
+
+When writing to a shared page:
+1. Fetch the current page content first.
+2. Locate the correct project heading (create it if absent, appending it at the bottom).
+3. Insert the new item in the correct priority position within that heading's block.
+4. Never move items from one project's heading to another.
+
+If a PM To-Do's page is **dedicated to a single project** (its URL appears in only one registry row), do not add a project heading — just maintain the flat priority-sorted list.
+
+### Removing resolved items
+
+At the start of every sync run, before adding any new items, read the PM To-Do's page for each active project and scan for completed checklist items — these are to-do blocks where the checkbox is checked (Notion marks them with strikethrough in the UI).
+
+Remove any checked items from the page entirely. Do not archive or move them — just delete them so the list stays clean.
+
+Apply this cleanup to all project sections on a shared page, not just the project whose emails are being processed in the current run.
+
+---
+
 ## Handling unsorted emails (no project match)
 
 ### Preference check (do this first)
