@@ -44,6 +44,22 @@ When creating a new to-do item in Notion (Client To-Do's or PM To-Do's), always 
 
 ---
 
+---
+
+## Duplicate detection
+
+Before creating any new to-do item (Client To-Do's or PM To-Do's), check whether an equivalent open item already exists to avoid stacking duplicates across sync runs.
+
+**For Client To-Do's (database):** Query the data source for open items (Status ≠ "Completed") with a Name that closely matches the task you're about to create — use the email thread subject as the key anchor. If a match exists, skip creation and optionally append a dated note to the existing item's page body referencing the new email.
+
+**For PM To-Do's (database mode):** Query `collection://bedf182b-9cc2-48bf-9c4c-78c8a0ee3b79` for items where Project matches AND Name is substantially similar AND Status ≠ "Done". If found, skip creation.
+
+**For PM To-Do's (page mode):** Fetch the page content and check whether any unchecked checklist item contains the same Reference (email thread subject). If found, skip creation.
+
+Similarity check: an item is a duplicate if the thread subject or core task description matches an existing open item for the same project. Err on the side of skipping — a missed duplicate is worse than a missed item.
+
+---
+
 ## Resolution language (Step 3 of the sync task)
 
 Treat an item as resolved only when the email contains a clear signal of one of:
@@ -57,45 +73,52 @@ Generic positive language ("sounds good", "great") without one of the above is *
 
 ---
 
-## PM To-Do's page management
+## PM To-Do's management
 
-These rules apply every time the sync reads or writes the PM To-Do's page, whether adding new items or cleaning up completed ones.
+These rules apply every time the sync reads or writes PM To-Do's, whether adding new items, cleaning up completed ones, or escalating stale items.
 
-### Priority ordering
+### Detecting the storage mode
 
-Always maintain PM To-Do items in priority order — highest priority at the top, lowest at the bottom:
+Inspect the `PM To-Do's page` value in the registry row:
+- If it starts with `collection://` → **database mode**: use structured Notion database fields (Name, Project, Priority, Deadline, Status, Reference).
+- If it starts with `https://` → **page mode**: use checklist items on a plain Notion page (legacy — new setups should use database mode).
 
-1. ⚠️ HIGH
-2. Medium (no emoji)
-3. Low (no emoji)
-4. Unspecified priority — append at the bottom
+### Database mode (preferred)
 
-When adding a new item, insert it at the correct position within its priority band, not simply at the end of the list. After adding, re-check the full list order and reorder if needed.
+**Schema fields:**
+- **Name** (title) — task description, no project prefix needed (Project field handles routing)
+- **Project** (select) — the project display name from the registry (e.g. "SGD B2B", "Gemoss")
+- **Priority** (select) — `high`, `Medium`, or `Low`
+- **Deadline** (date) — set if extracted from email; leave empty otherwise
+- **Status** (select) — always `To do` when creating
+- **Reference** (text) — email thread subject
 
-Indicate priority inline in the checklist text using `⚠️ HIGH`, `Medium`, or `Low` suffix — e.g.:
-`- [ ] [SGD B2B] Confirm delivery date (re: "Q3 shipment follow-up") ⚠️ HIGH`
+**Derive priority from the email:**
+- Explicit urgency language ("urgent", "ASAP", "blocking", "critical"), deadline today or tomorrow → `high`
+- General request with a stated deadline → `Medium`
+- FYI-style obligation, no urgency → `Low`
+- When unclear → `Medium`
 
-Derive priority from the email: explicit urgency language ("urgent", "ASAP", "blocking", "critical", deadline today/tomorrow) → HIGH; general requests with a stated deadline → Medium; FYI-style obligations with no urgency → Low. When unclear, default to Medium.
+**Removing resolved items:** At the start of every sync run, before adding new items, query the database for items where Status = "Done" and delete them. Do not archive — delete.
 
-### Grouping by project (shared PM To-Do's page)
+**Staleness escalation:** After the cleanup step, query the database for items where Priority = "high" AND Status ≠ "Done" AND createdTime is more than 2 days ago. If any are found, include them in the sync summary under a "⚠️ Stale HIGH items" heading — list the item name, project, and how many days it has been open. Do not auto-resolve or modify these items; just surface them for the PM's attention.
 
-If two or more active registry rows point to the **same PM To-Do's page URL**, group all items under a heading per project. Use H2 (`##`) headings matching the project display name (e.g. `## SGD B2B`, `## Gemoss`). Within each group, maintain priority order as above.
+### Page mode (legacy)
 
-When writing to a shared page:
-1. Fetch the current page content first.
-2. Locate the correct project heading (create it if absent, appending it at the bottom).
-3. Insert the new item in the correct priority position within that heading's block.
-4. Never move items from one project's heading to another.
+If the PM To-Do's URL is a plain page (starts with `https://`):
 
-If a PM To-Do's page is **dedicated to a single project** (its URL appears in only one registry row), do not add a project heading — just maintain the flat priority-sorted list.
+**Priority ordering** — maintain items in priority order within each project section:
+1. ⚠️ HIGH (items with explicit urgency)
+2. Medium
+3. Low / unspecified
 
-### Removing resolved items
+Indicate priority inline: `- [ ] [SGD B2B] Task name ⚠️ HIGH`
 
-At the start of every sync run, before adding any new items, read the PM To-Do's page for each active project and scan for completed checklist items — these are to-do blocks where the checkbox is checked (Notion marks them with strikethrough in the UI).
+**Grouping** — if the same page URL appears in multiple registry rows, group items under H2 project headings (e.g. `## SGD B2B`). Single-project pages use a flat list.
 
-Remove any checked items from the page entirely. Do not archive or move them — just delete them so the list stays clean.
+**Removing resolved items** — scan for checked checkboxes (`- [x]`) and delete them before adding new items.
 
-Apply this cleanup to all project sections on a shared page, not just the project whose emails are being processed in the current run.
+**Staleness escalation** — flag any ⚠️ HIGH items that appeared in the previous sync run and are still present (indicating no resolution). List them in the summary under "⚠️ Stale HIGH items".
 
 ---
 
@@ -128,6 +151,23 @@ Only proceed with triage for emails that look like genuine human-written message
 4. After the PM responds, process assigned emails as normal (add to-do items with thread name and deadline as above), then offer to update the project's signals if the same sender/domain keeps appearing.
 
 Present the best guess as the first option (based on partial keyword or domain similarity), labeled with "(best guess)".
+
+### Handling a free-text project name from the PM
+
+If the PM types a project name not found in the registry (e.g. they selected "Other" and typed "Ermitazas"):
+1. Acknowledge that the project isn't registered yet.
+2. Ask: "Would you like to register [project name] now so future emails route automatically?" with options "Yes, register it" / "Skip for now".
+3. If yes: ask for the Jira key and any initial signals (domain, stakeholder names), then append a new row to `projects-registry.md` with Status = `active`. The Client To-Do's data source and PM To-Do's page will be blank until the PM runs full onboarding for this project.
+4. Once registered, proceed to create the to-do item for the current email as a PM task (since there's no Client To-Do's database yet).
+
+### Signal learning
+
+After completing triage (all unsorted emails assigned or skipped), check whether any assignment reveals a sender name or domain that consistently signals a known project but isn't in that project's Signals column yet.
+
+If so, mention it at the end of the summary:
+> "Jonas (jonas@...) was assigned to SGD B2B — consider adding 'Jonas' or the domain to SGD B2B's signals so future emails route automatically."
+
+Do not auto-update the registry — always suggest and let the PM confirm. If they confirm, append the new signals to the relevant row in `projects-registry.md`.
 
 ### Disable/enable toggle
 

@@ -120,11 +120,17 @@ TITLE: [Short statement describing the broken behaviour — not a call-to-action
   Bad:  "Fix checkout failing when applying coupon on EU store"]
 
 JIRA FIELD MAPPING — populate these as dedicated Jira fields only (no description needed):
-  - Summary       → ticket title (see TITLE rule above)
-  - Environment   → Jira "Environment" field (General tab)
-  - Steps to reproduce → Jira "Steps to reproduce" field (General tab)
-  - Actual Result → Jira "Actual Result" field (General tab)
-  - Expected Result → Jira "Expected Result" field (General tab)
+  - Summary          → ticket title (see TITLE rule above)
+  - Environment      → Jira "Environment" field (General tab) — `environment` system field (ADF)
+  - Steps to reproduce → Jira "Steps to reproduce" field (General tab) — `customfield_10091` (ADF)
+  - Actual Result    → Jira "Actual Result" field (General tab) — `customfield_10089` (ADF)
+  - Expected Result  → Jira "Expected Result" field (General tab) — `customfield_10090` (ADF)
+  - Screenshot/Video → Jira "Screenshot/Video" field (General tab) — `customfield_11703` (ADF)
+    → Include when: the bug is visual/UI (wrong layout, missing element, display glitch, broken rendering)
+    → Ask the PM: "Do you have a screenshot or video link to attach?"
+  - Logs             → Jira "Logs" field (General tab) — `customfield_11704` (ADF)
+    → Include when: the bug involves a backend/server/import/export/API/integration error
+    → Ask the PM: "Do you have relevant error logs or a stack trace to include?"
 
 No description is required for bug tickets. All relevant information goes into the dedicated General tab fields above.
 ```
