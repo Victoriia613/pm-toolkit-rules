@@ -119,26 +119,14 @@ TITLE: [Short statement describing the broken behaviour — not a call-to-action
   Good: "Checkout fails when applying coupon on EU store"
   Bad:  "Fix checkout failing when applying coupon on EU store"]
 
-JIRA FIELD MAPPING — populate these as dedicated Jira fields, not inside the description:
+JIRA FIELD MAPPING — populate these as dedicated Jira fields only (no description needed):
   - Summary       → ticket title (see TITLE rule above)
   - Environment   → Jira "Environment" field (General tab)
   - Steps to reproduce → Jira "Steps to reproduce" field (General tab)
   - Actual Result → Jira "Actual Result" field (General tab)
   - Expected Result → Jira "Expected Result" field (General tab)
 
-DESCRIPTION (General tab — remaining sections):
-BEFORE & AFTER
-Before (broken): [What is currently happening — be specific]
-After (fixed): [What should happen]
-
-PROOF
-[Test case to confirm fix]
-1. [Step]
-2. [Step]
-Expected result: [Specific outcome]
-
-BOUNDARIES
-[What is not being fixed in this task]
+No description is required for bug tickets. All relevant information goes into the dedicated General tab fields above.
 ```
 
 ### Epic template:
