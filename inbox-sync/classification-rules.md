@@ -57,9 +57,15 @@ Generic positive language ("sounds good", "great") without one of the above is *
 
 ## Handling unsorted emails (no project match)
 
-If an email looks like a genuine client/stakeholder email but doesn't match any project's signals in the registry, do not silently skip it. Instead:
+### Preference check (do this first)
 
-**First, silently skip any system-generated notifications** — these are never worth triaging:
+Before doing anything with unsorted emails, read `pm-toolkit-prefs.md` from the working directory (same folder as `projects-registry.md`). If the file contains `unsorted_email_summary: off`, skip the entire unsorted triage step silently — don't mention it in the summary either.
+
+If the file doesn't exist or the setting is absent, the feature is **on** by default.
+
+### System notifications — always skip silently
+
+Never triage system-generated notifications, regardless of the preference setting:
 - Jira notifications (issue created, commented, status changed, assigned, etc.)
 - Notion notifications (page shared, comment added, etc.)
 - GitHub/GitLab/Bitbucket notifications
@@ -68,14 +74,28 @@ If an email looks like a genuine client/stakeholder email but doesn't match any 
 
 Only proceed with triage for emails that look like genuine human-written messages from clients or stakeholders.
 
-1. Collect all such emails into a list.
-2. After completing the normal sync summary, present the unsorted emails to the PM using the `AskUserQuestion` tool — one question per email (batch up to 4 per call). For each email show: sender, subject, and a one-line summary of the email content.
+### Triage flow (when feature is on)
+
+1. Collect all unmatched human emails into a list.
+2. After completing the normal sync summary, present them to the PM using the `AskUserQuestion` tool — one question per email (batch up to 4 per call). For each email show: sender, subject, and a one-line summary of the email content.
 3. For each unsorted email, offer these options:
    - One option per active project (e.g. "SGD B2B", "Gemoss") — selecting one assigns the email to that project and creates the to-do item immediately
    - "Skip — not relevant" — discards the email for this sync run
-4. After the PM responds, process the assigned emails as normal (add to-do items with thread name and deadline as above), then offer to update the project's signals in the registry if the same sender/domain keeps appearing.
+4. After the PM responds, process assigned emails as normal (add to-do items with thread name and deadline as above), then offer to update the project's signals if the same sender/domain keeps appearing.
 
-Present the best guess as the first option (based on partial keyword or domain similarity), labeled with "(best guess)". This lets the PM confirm quickly with a single click in the common case.
+Present the best guess as the first option (based on partial keyword or domain similarity), labeled with "(best guess)".
+
+### Disable/enable toggle
+
+After presenting all unsorted emails (once all triage questions are answered), show one final `AskUserQuestion` with a single question:
+
+> "Unsorted email summaries are currently **on**. Would you like to change this?"
+
+Options:
+- "Keep on" — do nothing
+- "Turn off — don't show unsorted summaries in future syncs" — write `unsorted_email_summary: off` to `pm-toolkit-prefs.md` (create the file if it doesn't exist, update the line if it does)
+
+When the feature is **off** and the PM later asks to re-enable it, or when asked directly, write `unsorted_email_summary: on` (or remove the line) in `pm-toolkit-prefs.md`.
 
 ---
 
