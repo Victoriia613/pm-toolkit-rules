@@ -59,6 +59,15 @@ Generic positive language ("sounds good", "great") without one of the above is *
 
 If an email looks like a genuine client/stakeholder email but doesn't match any project's signals in the registry, do not silently skip it. Instead:
 
+**First, silently skip any system-generated notifications** — these are never worth triaging:
+- Jira notifications (issue created, commented, status changed, assigned, etc.)
+- Notion notifications (page shared, comment added, etc.)
+- GitHub/GitLab/Bitbucket notifications
+- Any noreply or no-reply sender address
+- Automated tool notifications from project management, CI/CD, monitoring, or analytics platforms
+
+Only proceed with triage for emails that look like genuine human-written messages from clients or stakeholders.
+
 1. Collect all such emails into a list.
 2. After completing the normal sync summary, present the unsorted emails to the PM using the `AskUserQuestion` tool — one question per email (batch up to 4 per call). For each email show: sender, subject, and a one-line summary of the email content.
 3. For each unsorted email, offer these options:
