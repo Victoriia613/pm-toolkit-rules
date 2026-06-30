@@ -45,6 +45,7 @@ Never use these in task descriptions:
 
 ### TITLE
 - Must have a call-to-action verb. Example: "Remove H2 tag from email block" not "H2 tag in email block".
+- **Exception for Bugs:** Bug titles must describe the broken behaviour as a statement, not a call-to-action. Write what is happening, not what should be done. Example: "Product import from DIH is failing when product category does not exist in M2" — not "Fix product import from DIH failing when product category does not exist in M2". The title should read like a bug report, not a task assignment.
 
 ### PLATFORM AWARENESS
 Expected solution recipe — one of:
@@ -114,20 +115,21 @@ ASSETS
 
 ### Bug template:
 ```
-TITLE: [Bug: specific broken behaviour — e.g. "Fix: checkout fails when applying coupon on EU store"]
+TITLE: [Short statement describing the broken behaviour — not a call-to-action.
+  Good: "Checkout fails when applying coupon on EU store"
+  Bad:  "Fix checkout failing when applying coupon on EU store"]
 
+JIRA FIELD MAPPING — populate these as dedicated Jira fields, not inside the description:
+  - Summary       → ticket title (see TITLE rule above)
+  - Environment   → Jira "Environment" field (General tab)
+  - Steps to reproduce → Jira "Steps to reproduce" field (General tab)
+  - Actual Result → Jira "Actual Result" field (General tab)
+  - Expected Result → Jira "Expected Result" field (General tab)
+
+DESCRIPTION (General tab — remaining sections):
 BEFORE & AFTER
 Before (broken): [What is currently happening — be specific]
 After (fixed): [What should happen]
-
-STEPS TO REPRODUCE
-1. [Exact step]
-2. [Exact step]
-Result: [What actually happens]
-Expected: [What should happen]
-
-ENVIRONMENT
-[Store view / URL / browser / user type affected]
 
 PROOF
 [Test case to confirm fix]
@@ -161,10 +163,11 @@ OUT OF SCOPE
 
 ## Quality Self-Check (apply before presenting any draft)
 
-- [ ] Title has an action verb and is specific
+- [ ] Title has an action verb and is specific (Stories/Tasks) — OR is a behaviour statement for Bugs (no action verb)
 - [ ] No banned words used
 - [ ] Before/After is concrete and measurable
 - [ ] Test cases use exact values, not "test with valid input"
 - [ ] No sentence combines multiple distinct ideas (KISS)
 - [ ] Boundaries section is present
 - [ ] Task is a single concern — not overloaded
+- [ ] For Bugs: Environment, Steps to reproduce, Actual Result, and Expected Result are set as dedicated Jira fields (General tab), not buried in the description
